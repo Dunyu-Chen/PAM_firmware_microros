@@ -11,6 +11,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 }
 
+// ros executor timer callback
+void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
+{
+    rcl_ret_t ret = rcl_publish(&publisher, &pub_msg, NULL);
+    if (ret != RCL_RET_OK)
+    {
+        Error_Handler();
+    }
+    pub_msg.data++;
+}
+
 void StartROSApp(void *argument)
 {
     // set up ad7606
@@ -36,6 +47,7 @@ void StartROSApp(void *argument)
     adc_instance.os1_pin_port = OS1_GPIO_Port;
     adc_instance.os2_pin = OS2_Pin;
     adc_instance.os2_pin_port = OS2_GPIO_Port;
+
     AD7606_init(
         (struct AD7606_Params *) &adc_instance,
         5,
@@ -64,33 +76,43 @@ void StartROSApp(void *argument)
         Error_Handler();
     }
 
+    rmw_qos_profile_t qos_profile = rmw_qos_profile_default;
+    qos_profile.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
+    qos_profile.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
+    qos_profile.history = RMW_QOS_POLICY_HISTORY_KEEP_LAST;
+    qos_profile.depth = 5; // 设置depth为5
+    qos_profile.deadline.sec = 0; // 设置deadline的秒数部分
+    qos_profile.deadline.nsec = 1*1000; // 设置deadline的纳秒部分
+
     // micro ros initialization
     allocator = rcl_get_default_allocator();
+
     rclc_support_init(&support, 0, NULL, &allocator);
+
     rclc_node_init_default(&node, "cubemx_node", "", &support);
-    rclc_publisher_init_default(
+
+    rclc_publisher_init(
         &publisher,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
-        "cubemx_publisher");
+        "cubemx_publisher",
+        &qos_profile);
 
+    rcl_ret_t ret = rclc_timer_init_default(
+        &timer,
+        &support,
+        RCL_MS_TO_NS(2),
+        timer_callback);
+    pub_msg.data = 0.0;
+    executor = rclc_executor_get_zero_initialized_executor();
+    rclc_executor_init(&executor,&support.context, 1, &allocator);
+    ret = rclc_executor_add_timer(&executor,&timer);
+
+    rclc_executor_spin(&executor);
 
     for(;;)
     {
-        adc_value = adc_buffer[0];
-        if (adc_value>=32768){
-            adc_value = adc_value - 65535; //nagtive voltage
-        }
 
-        adc_voltage[0] = (adc_value/32767.0)*5.0 ;
-        pub_msg.data = adc_voltage[0];
-        rcl_ret_t ret = rcl_publish(&publisher, &pub_msg, NULL);
-        if (ret != RCL_RET_OK)
-        {
-            Error_Handler();
-        }
-
-        osDelay(100);
     }
 }
 
