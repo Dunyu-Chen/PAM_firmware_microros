@@ -1,0 +1,58 @@
+# 编译生成的文件
+*.o
+*.a
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+*.log
+*.bak
+*.iex
+*.i
+*.s
+*.d
+*.sym
+*.t
+*.tmp
+*.pdb
+*.obj
+*.res
+*.rc
+*.ilk
+*.aps
+*.pch
+*.idb
+*.vspscc
+*.tlog
+
+# 临时文件和系统文件
+Thumbs.db
+.DS_Store
+
+# IDE 配置文件和目录
+.cproject
+.mxproject
+.project
+.idea/
+.settings/
+.cmake-build-debug/
+.vscode/
+
+# STM32CubeIDE 项目文件
+.stm32cubeide
+
+# 忽略的源代码文件
+*.c~
+*.h~
+
+# 编译器配置文件
+*.user
+*.suo
+*.ncb
+
+# CMake 生成的文件
+CMakeLists.txt.user
+CMakeCache.txt
+cmake_install.cmake
+Makefile
