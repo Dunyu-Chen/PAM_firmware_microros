@@ -42,6 +42,9 @@ cmake-build-debug/
 # STM32CubeIDE 项目文件
 .stm32cubeide
 
+# micro ros stm32cubemx utils
+micro_ros_stm32cubemx_utils
+
 # 忽略的源代码文件
 *.c~
 *.h~
