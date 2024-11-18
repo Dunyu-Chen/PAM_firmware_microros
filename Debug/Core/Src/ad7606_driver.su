@@ -1,0 +1,4 @@
+../Core/Src/ad7606_driver.c:3:6:AD7606_init	16	static
+../Core/Src/ad7606_driver.c:75:6:AD7606_reset	16	static
+../Core/Src/ad7606_driver.c:83:6:AD7606_start_conversion_pwm	40	static
+../Core/Src/ad7606_driver.c:97:6:AD7606_read_data_exti	16	static,ignoring_inline_asm
