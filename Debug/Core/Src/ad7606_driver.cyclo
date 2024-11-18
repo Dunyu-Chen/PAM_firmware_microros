@@ -1,4 +1,0 @@
-../Core/Src/ad7606_driver.c:3:6:AD7606_init	13
-../Core/Src/ad7606_driver.c:75:6:AD7606_reset	1
-../Core/Src/ad7606_driver.c:83:6:AD7606_start_conversion_pwm	11
-../Core/Src/ad7606_driver.c:97:6:AD7606_read_data_exti	1
