@@ -36,7 +36,7 @@ Thumbs.db
 .project
 .idea/
 .settings/
-.cmake-build-debug/
+cmake-build-debug/
 .vscode/
 
 # STM32CubeIDE 项目文件

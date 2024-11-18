@@ -10,13 +10,13 @@ tested on :
 
 ## project setup instruction
 
-0. clone this git repository 
+1. clone this git repository 
 
 ```bash 
 to do 
 ```
 
-1. clone micro_ros_stm32cubemx_utils repo to project folder
+2. clone micro_ros_stm32cubemx_utils repo to project folder
 
 > As the project is based on ROS2 Humble switch the repo branch to humble
 
@@ -26,10 +26,10 @@ cd micro_ros_stm32cubemx_utils
 git checkout humble
 ```
 
-2. clone the self defined ROS2 transmission interfaces to micro-ros build list
+3. clone the self defined ROS2 transmission interfaces to micro-ros build list
 
 ```bash
 to do 
 ```
 
-3. Open STM32CubeIDE and build the project
+4. Open STM32CubeIDE and build the project
