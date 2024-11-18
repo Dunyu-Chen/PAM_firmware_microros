@@ -14,6 +14,8 @@
 #include <std_msgs/msg/float32.h>
 #include <std_msgs/msg/int32.h>
 
+#include "ad7606_driver.h"
+
 bool cubemx_transport_open(struct uxrCustomTransport * transport);
 bool cubemx_transport_close(struct uxrCustomTransport * transport);
 size_t cubemx_transport_write(struct uxrCustomTransport* transport, const uint8_t * buf, size_t len, uint8_t * err);
@@ -31,4 +33,8 @@ rcl_node_t node;
 rcl_publisher_t publisher;
 std_msgs__msg__Float32 pub_msg;
 
+struct AD7606_Params adc_instance;
+volatile uint16_t adc_buffer[8];
+volatile float adc_voltage[8];
+int adc_value = 0.0;
 #endif /* INC_MICRO_ROS_APP_H_ */
