@@ -30,15 +30,17 @@ void * microros_zero_allocate(size_t number_of_elements, size_t size_of_element,
 rclc_support_t support;
 rcl_allocator_t allocator;
 rcl_node_t node;
-rcl_publisher_t publisher;
 
+rcl_publisher_t publisher;
+rcl_subscription_t subscription;
 rcl_timer_t timer;
 rclc_executor_t executor;
 
-
+std_msgs__msg__Float32 sub_msg;
 std_msgs__msg__Float32 pub_msg;
 
 struct AD7606_Params adc_instance;
 volatile uint16_t adc_buffer[8];
 volatile float adc_voltage[8];
+volatile uint64_t count =0;
 #endif /* INC_MICRO_ROS_APP_H_ */

@@ -7,23 +7,50 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     if (GPIO_Pin == adc_instance.busy_pin)
     {
         AD7606_read_data_exti((struct AD7606_Params *) &adc_instance,adc_buffer);
+        if (count%10000<7000)
+        {
+            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1,5000);
+            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2,5000-10);
+        }
+        else
+        {
+            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1,5000-10);
+            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2,5000);
+        }
+        count++;
     }
+
+}
+
+void subscription_callback(const void * msgin)
+{
 
 }
 
 // ros executor timer callback
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
+    pub_msg.data = adc_buffer[0]*1.0;
+    if (pub_msg.data >= 32768.0)
+    {
+        pub_msg.data = pub_msg.data -65535.0;
+    }
+    pub_msg.data = (pub_msg.data / 32767.0) *6.0;
     rcl_ret_t ret = rcl_publish(&publisher, &pub_msg, NULL);
     if (ret != RCL_RET_OK)
     {
         Error_Handler();
     }
-    pub_msg.data++;
 }
+
+
 
 void StartROSApp(void *argument)
 {
+
+    HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
+
     // set up ad7606
     adc_instance.busy_pin = BUSY_Pin;
     adc_instance.busy_pin_port = BUSY_GPIO_Port;
@@ -50,7 +77,7 @@ void StartROSApp(void *argument)
 
     AD7606_init(
         (struct AD7606_Params *) &adc_instance,
-        5,
+        10,
         's',
         0);
     AD7606_reset((struct AD7606_Params *) &adc_instance);
@@ -98,15 +125,30 @@ void StartROSApp(void *argument)
         "cubemx_publisher",
         &qos_profile);
 
-    rcl_ret_t ret = rclc_timer_init_default(
+    rclc_subscription_init(
+        &subscription,
+        &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
+        "cubemx_subscription", &qos_profile);
+
+    rclc_timer_init_default(
         &timer,
         &support,
         RCL_MS_TO_NS(2),
         timer_callback);
+
     pub_msg.data = 0.0;
+
     executor = rclc_executor_get_zero_initialized_executor();
-    rclc_executor_init(&executor,&support.context, 1, &allocator);
-    ret = rclc_executor_add_timer(&executor,&timer);
+
+    rclc_executor_init(&executor,&support.context, 2, &allocator);
+    rclc_executor_add_timer(&executor,&timer);
+    rclc_executor_add_subscription(
+        &executor,
+        &subscription,
+        &sub_msg,
+        &subscription_callback,
+        ON_NEW_DATA);
 
     rclc_executor_spin(&executor);
 
