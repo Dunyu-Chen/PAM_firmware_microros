@@ -7,16 +7,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     if (GPIO_Pin == adc_instance.busy_pin)
     {
         AD7606_read_data_exti((struct AD7606_Params *) &adc_instance,adc_buffer);
-        if (count%10000<7000)
-        {
-            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1,5000);
-            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2,5000-10);
-        }
-        else
-        {
-            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1,5000-10);
-            __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2,5000);
-        }
         count++;
     }
 
@@ -30,12 +20,12 @@ void subscription_callback(const void * msgin)
 // ros executor timer callback
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
-    pub_msg.data = adc_buffer[0]*1.0;
+    pub_msg.data = adc_buffer[2]*1.0;
     if (pub_msg.data >= 32768.0)
     {
         pub_msg.data = pub_msg.data -65535.0;
     }
-    pub_msg.data = (pub_msg.data / 32767.0) *6.0;
+    pub_msg.data = (pub_msg.data / 32767.0);
     rcl_ret_t ret = rcl_publish(&publisher, &pub_msg, NULL);
     if (ret != RCL_RET_OK)
     {
@@ -50,7 +40,8 @@ void StartROSApp(void *argument)
 
     HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
-
+    __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1,5000);
+    __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2,5000);
     // set up ad7606
     adc_instance.busy_pin = BUSY_Pin;
     adc_instance.busy_pin_port = BUSY_GPIO_Port;
@@ -79,7 +70,7 @@ void StartROSApp(void *argument)
         (struct AD7606_Params *) &adc_instance,
         10,
         's',
-        0);
+        32);
     AD7606_reset((struct AD7606_Params *) &adc_instance);
 
     AD7606_start_conversion_pwm((struct AD7606_Params *) &adc_instance,1000);
